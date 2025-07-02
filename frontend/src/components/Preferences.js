@@ -69,17 +69,17 @@ function Preferences() {
     if (!isLoggedIn) {
         return (
             <div style={{ padding: '20px' }}>
-                <h1>User Preferences</h1>
-                <p style={{ color: 'red' }}>{error}</p>
+                <h1 className='mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white'>User Preferences</h1>
+                <p className='text-red-500 text-base'>{error}</p>
             </div>
         );
     }
 
     if (error && allTypes.length === 0) {
         return (
-            <div style={{ padding: '20px' }}>
-                <h1>User Preferences</h1>
-                <p style={{ color: 'red' }}>{error}</p>
+            <div className='px-3'>
+                <h1 className='mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white'>User Preferences</h1>
+                <p className='text-red-500 text-base'>{error}</p>
             </div>
         );
     }

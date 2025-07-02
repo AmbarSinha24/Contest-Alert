@@ -7,7 +7,7 @@ const Navbar = () => {
 
             {/* Centered nav items */}
             <ul className="absolute left-1/2 transform -translate-x-1/2 flex gap-5 font-medium text-base capitalize">
-                <li><Link to="/" className="py-1 px-2 capitalize">LOGIN</Link></li>
+                <li><Link to="/login" className="py-1 px-2 capitalize">LOGIN</Link></li>
                 <li><Link to="/preferences" className="py-1 px-2 capitalize ">PREFERENCES</Link></li>
                 <li><Link to="/contests" className="py-1 px-2 capitalize">CONTESTS</Link></li>
             </ul>

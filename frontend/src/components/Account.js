@@ -31,8 +31,8 @@ function Account() {
     if (!isLoggedIn) {
         return (
             <div style={{ padding: '20px' }}>
-                <h1>Account Info</h1>
-                <p style={{ color: 'red' }}>{error}</p>
+                <h1 className='mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white'>Account Info</h1>
+                <p className='text-red-500 text-base'>{error}</p>
             </div>
         );
     }
@@ -45,12 +45,12 @@ function Account() {
 
     return (
         <div style={{ padding: '20px' }}>
-            <h1>Account Info</h1>
-            <p><strong>Name:</strong>  {userInfo.name}</p>
-            <p><strong>Email:</strong> {userInfo.email}</p>
+            <h1 className='mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white'>Account Info</h1>
+            <p className='text-base font-normal text-gray-500 lg:text-lg sm:6 xl:dark:text-gray-400'><strong>Name:</strong>  {userInfo.name}</p>
+            <p className='text-base font-normal text-gray-500 lg:text-lg sm:6 xl:dark:text-gray-400'><strong>Email:</strong> {userInfo.email}</p>
 
-            <h3>Reminder Preferences</h3>
-            <ul>
+            <h3 className='mb-4 py-2 text-lg font-extrabold leading-none tracking-tight text-gray-900 md:text-xl lg:text-2xl dark:text-white'>Reminder Preferences</h3>
+            <ul className='text-base font-normal text-gray-500 lg:text-lg sm:6 xl:dark:text-gray-400'>
                 <li>
                     LeetCode Weekly: {hasPref('Weekly') ? 'Yes' : 'No'}
                 </li>

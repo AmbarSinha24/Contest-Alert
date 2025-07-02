@@ -280,6 +280,7 @@ app.get('/auth/google/callback',
     async (req, res) => {
         try {
             const user = req.user;
+            await axios.post('http://localhost:5001/api/updateContests'); // ⬅️ Add this
 
             const prefs = await user.getContestTypes();
             if (!prefs.length) {
@@ -503,11 +504,13 @@ function parseCodeforcesType(name) {
     return 'Other';
 }
 
+// 
 app.post('/api/updateContests', async (req, res) => {
     try {
         const cfData = await fetchCodeforcesContests();
         const lcData = computeUpcomingLeetCodeContests();
         const allData = [...cfData, ...lcData];
+
         const fixedTypeMap = {
             'Weekly': 1,
             'Biweekly': 2,
@@ -523,7 +526,9 @@ app.post('/api/updateContests', async (req, res) => {
         const types = {};
         for (const row of allData) {
             if (!platforms[row.platformName]) {
-                platforms[row.platformName] = await Platform.findOrCreate({ where: { name: row.platformName } }).then(r => r[0]);
+                platforms[row.platformName] = await Platform.findOrCreate({
+                    where: { name: row.platformName }
+                }).then(r => r[0]);
             }
             if (!types[row.typeName]) {
                 const id = fixedTypeMap[row.typeName] || fixedTypeMap['Other'];
@@ -531,11 +536,9 @@ app.post('/api/updateContests', async (req, res) => {
             }
         }
 
-        // Reset contests
-        await Contest.destroy({ where: {} });
-        // Bulk create contests with FK ids
+        // ✅ Upsert contests instead of deleting all
         for (const row of allData) {
-            await Contest.create({
+            await Contest.upsert({
                 name: row.name,
                 startTime: row.startTime,
                 duration: row.duration,
@@ -544,8 +547,11 @@ app.post('/api/updateContests', async (req, res) => {
             });
         }
 
-        res.json({ message: 'Contests updated', count: allData.length });
-    } catch (err) { console.error('Update error:', err); res.status(500).json({ error: 'Failed to update contests' }); }
+        res.json({ message: 'Contests upserted', count: allData.length });
+    } catch (err) {
+        console.error('Update error:', err);
+        res.status(500).json({ error: 'Failed to update contests' });
+    }
 });
 
 app.get('/api/contests', async (req, res) => {
@@ -557,6 +563,48 @@ app.get('/api/contests', async (req, res) => {
 });
 
 
+// async function createCalendarEvent(user, contest) {
+//     const oAuth2Client = new google.auth.OAuth2(
+//         process.env.GOOGLE_CLIENT_ID,
+//         process.env.GOOGLE_CLIENT_SECRET
+//     );
+
+//     oAuth2Client.setCredentials({
+//         access_token: user.accessToken,
+//         refresh_token: user.refreshToken
+//     });
+
+//     const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+
+//     const event = {
+//         summary: contest.name,
+//         description: `${contest.name} - Programming Contest`,
+//         start: {
+//             dateTime: new Date(contest.startTime * 1000).toISOString(),
+//             timeZone: 'Asia/Kolkata'
+//         },
+//         end: {
+//             dateTime: new Date((contest.startTime + contest.duration) * 1000).toISOString(),
+//             timeZone: 'Asia/Kolkata'
+//         },
+//         reminders: {
+//             useDefault: false,
+//             overrides: [{ method: 'popup', minutes: 10 }]
+//         }
+//     };
+
+
+//     try {
+//         const res = await calendar.events.insert({ ... });
+//         console.log('📅 Event created:', res.data);
+//         return res.data.id;
+//     } catch (err) {
+//         console.error('❌ Calendar insert failed:', err.response?.data || err.message);
+//         throw err;
+//     }
+
+//     return res.data.id; // 👈 return Google Calendar event ID
+//}
 async function createCalendarEvent(user, contest) {
     const oAuth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
@@ -587,14 +635,63 @@ async function createCalendarEvent(user, contest) {
         }
     };
 
-    const res = await calendar.events.insert({
-        calendarId: 'primary',
-        resource: event
-    });
-
-    return res.data.id; // 👈 return Google Calendar event ID
-
+    try {
+        const res = await calendar.events.insert({
+            calendarId: 'primary',
+            resource: event
+        });
+        console.log('📅 Event created:', res.data.htmlLink); // This will show Google Calendar event link
+        return res.data.id;
+    } catch (err) {
+        console.error('❌ Calendar insert failed:', err.response?.data || err.message);
+        throw err;
+    }
 }
+app.post('/api/add-to-calendar/:contestId', async (req, res) => {
+    if (!req.user) return res.status(401).json({ message: 'Not authenticated' });
+
+    const contestId = req.params.contestId;
+
+    try {
+        const contest = await Contest.findByPk(contestId, { include: [Platform] });
+        if (!contest) return res.status(404).json({ message: 'Contest not found' });
+
+        const existing = await CalendarEvent.findOne({
+            where: {
+                UserId: req.user.id,
+                ContestId: contest.id
+            }
+        });
+
+        if (existing) {
+            return res.json({ message: 'Contest already added to calendar.' });
+        }
+
+        const eventId = await createCalendarEvent(req.user, contest);
+        await CalendarEvent.create({
+            eventId,
+            UserId: req.user.id,
+            ContestId: contest.id
+        });
+
+        res.json({ message: 'Contest successfully added to calendar.' });
+    } catch (err) {
+        console.error('Calendar add error:', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
+// DANGER: Clears all calendar events from DB
+app.get('/dev/clear-calendar-events', async (req, res) => {
+    try {
+        await CalendarEvent.destroy({ where: {} });
+        res.send('🧹 All calendar event records cleared from DB.');
+    } catch (err) {
+        console.error('Failed to clear calendar events:', err);
+        res.status(500).send('Failed to clear calendar events');
+    }
+});
 
 
 // ----- 9) Email Reminders via Cron -----
