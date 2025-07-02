@@ -89,7 +89,7 @@ function Preferences() {
     }
 
     return (
-        <div className='px-3 ' >
+        <div className='px-3 ml-5' >
             <h1 className='mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white'>User Preferences</h1>
             <form onSubmit={handleSubmit}>
                 {allTypes.map((type) => (

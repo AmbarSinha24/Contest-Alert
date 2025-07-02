@@ -38,7 +38,7 @@ function Login() {
     };
 
     return (
-        <div className='px-3'>
+        <div className='px-3 ml-5'>
             <h1 className='mb-4 text-2xl font-extrabold leading-none tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white'>Login</h1>
 
             {/* If user is not logged in, show "Login with Google" */}

@@ -10,6 +10,7 @@ import Contests from './components/Contests';
 import Account from './components/Account';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
+import Footer from './components/Footer';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -46,6 +47,7 @@ function App() {
                 {/* Account info page */}
                 <Route path="/account" element={<Account />} />
             </Routes>
+            <Footer />
         </Router>
     );
 }
