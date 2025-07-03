@@ -619,26 +619,26 @@ app.get('/dev/clear-calendar-events', async (req, res) => {
 
 
 // ----- 9) Email Reminders via Cron -----
-const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
-cron.schedule('* * * * *', async () => {
-    const nowSec = Math.floor(Date.now() / 1000);
-    const remSec = nowSec + 20 * 60;
-    const upcoming = await Contest.findAll({ where: { startTime: { [Op.between]: [remSec - 30, remSec + 30] } }, include: ContestType });
+// const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } });
+// cron.schedule('* * * * *', async () => {
+//     const nowSec = Math.floor(Date.now() / 1000);
+//     const remSec = nowSec + 20 * 60;
+//     const upcoming = await Contest.findAll({ where: { startTime: { [Op.between]: [remSec - 30, remSec + 30] } }, include: ContestType });
 
-    for (const contest of upcoming) {
-        const users = await contest.ContestType.getUsers();
-        for (const u of users) {
-            const mail = {
-                from: process.env.EMAIL_USER,
-                to: u.email,
-                subject: `Reminder: ${contest.name} starts soon!`,
-                text: `Hi ${u.name},\n\n${contest.name} starts at ${new Date(contest.startTime * 1000).toLocaleString()}.\n\nGood luck!`
-            };
-            try { await transporter.sendMail(mail); } catch (e) { console.error(`Email to ${u.email} failed:`, e); }
-            await new Promise(r => setTimeout(r, 1000));
-        }
-    }
-});
+//     for (const contest of upcoming) {
+//         const users = await contest.ContestType.getUsers();
+//         for (const u of users) {
+//             const mail = {
+//                 from: process.env.EMAIL_USER,
+//                 to: u.email,
+//                 subject: `Reminder: ${contest.name} starts soon!`,
+//                 text: `Hi ${u.name},\n\n${contest.name} starts at ${new Date(contest.startTime * 1000).toLocaleString()}.\n\nGood luck!`
+//             };
+//             try { await transporter.sendMail(mail); } catch (e) { console.error(`Email to ${u.email} failed:`, e); }
+//             await new Promise(r => setTimeout(r, 1000));
+//         }
+//     }
+// });
 
 
 
