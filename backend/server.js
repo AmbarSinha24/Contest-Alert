@@ -192,7 +192,7 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: '/auth/google/callback',
+    callbackURL: 'https://contest-alert-production.up.railway.app/auth/google/callback',
     scope: ['profile', 'email', 'https://www.googleapis.com/auth/calendar.events'], // ✅ Calendar permission
     accessType: 'offline',  // ✅ needed to get refreshToken
     prompt: 'consent'       // ✅ force Google to send refreshToken
