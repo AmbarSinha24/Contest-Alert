@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 const Platforms = () => {
     const navigate = useNavigate();
     return (
-        <div id='speciality' className='flex flex-col items-center gap-4 py-16 text-black  my-5 max-w-7xl mx-auto rounded-lg font-sans '>
+        <div id='speciality' className='flex flex-col items-center bg-gradient-to-r from-teal-200 via-gray-200 to-teal-400  gap-4 py-16 text-black  my-5 max-w-7xl mx-auto rounded-lg font-sans '>
             <h1 className='text-4xl font-medium font-bold'>Multiple Platforms at one Destination</h1>
             <p className='sm:w-1/3 text-center text-m'>Simply browse through the list of upcoming Contests, add it in your Google Calender hassle-free.</p>
             <div className='flex sm:justify-center gap-4 pt-5 w-full overflow-scroll '>

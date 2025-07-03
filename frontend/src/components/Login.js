@@ -9,7 +9,7 @@ function Login() {
         async function fetchUser() {
             try {
                 // Check if user is logged in
-                const res = await axios.get('http://localhost:5001/api/user/info', {
+                const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/user/info`, {
                     withCredentials: true
                 });
                 setUser(res.data); // e.g. { name, email, reminderPreferences }
@@ -24,7 +24,7 @@ function Login() {
     const handleLogout = async () => {
         try {
             // Passport >= 0.6.0 requires a callback in req.logout
-            await axios.get('http://localhost:5001/auth/logout', {
+            await axios.get(`${process.env.REACT_APP_BACKEND_URL}/auth/logout`, {
                 withCredentials: true
             });
             // Clear user from state
@@ -45,32 +45,37 @@ function Login() {
             {!user && (
                 <>
                     <p className='mb-6 text-lg font-normal text-gray-500 lg:text-xl sm:6 xl: dark:text-gray-400'>Click the button below to log in with Google.</p>
-                    <a href="http://localhost:5001/auth/google">
+                    <a href={`${process.env.REACT_APP_BACKEND_URL}/auth/google`}>
                         <button className='text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"'>
                             Login with Google
                         </button>
                     </a>
                 </>
-            )}
+            )
+            }
 
             {/* If user is logged in, show "Already logged in" + sign out button */}
-            {user && (
-                <>
-                    <p className='mb-6 text-base font-normal text-gray-500 lg:text-lg  xl: dark:text-gray-400'>Already logged in as: <strong>{user.email}</strong></p>
-                    <button className='focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900'
+            {
+                user && (
+                    <>
+                        <p className='mb-6 text-base font-normal text-gray-500 lg:text-lg  xl: dark:text-gray-400'>Already logged in as: <strong>{user.email}</strong></p>
+                        <button className='focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900'
 
-                        onClick={handleLogout}
-                    >
-                        Sign Out
-                    </button>
-                </>
-            )}
+                            onClick={handleLogout}
+                        >
+                            Sign Out
+                        </button>
+                    </>
+                )
+            }
 
             {/* If there's a message, show it below the login/sign-out section */}
-            {message && (
-                <p style={{ marginTop: '1rem', color: 'green' }}>{message}</p>
-            )}
-        </div>
+            {
+                message && (
+                    <p style={{ marginTop: '1rem', color: 'green' }}>{message}</p>
+                )
+            }
+        </div >
     );
 }
 

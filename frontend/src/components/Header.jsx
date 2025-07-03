@@ -5,7 +5,7 @@ import { assets } from '../assets/assets'
 const Header = () => {
     const navigate = useNavigate();
     return (
-        <div className='flex flex-col md:flex-row flex-wrap bg-gradient-to-r from-teal-500 to-blue-500 rounded-lg px-6 md:px-10 lg:px-20 max-w-7xl mx-auto'>
+        <div className='flex flex-col md:flex-row flex-wrap bg-gradient-to-r from-teal-500 to-blue-400 rounded-lg px-6 md:px-10 lg:px-20 max-w-7xl mx-auto'>
 
             {/* --------- Header Left --------- */}
             <div className='md:w-1/2 flex flex-col items-start justify-center gap-4 py-10 m-auto md:py-[10vw] md:mb-[-30px]'>
@@ -24,7 +24,7 @@ const Header = () => {
 
             {/* --------- Header Right --------- */}
             <div className='md:w-1/2 relative'>
-                {/* <img className='w-full md:absolute bottom-0 h-auto rounded-lg' src={assets.cficon} alt="" /> */}
+                {/* <img className='w-full md:absolute bottom-0 h-auto rounded-lg' src={assets.logo} alt="" /> */}
             </div>
         </div>
     )

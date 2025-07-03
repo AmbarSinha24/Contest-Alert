@@ -15,8 +15,8 @@ function Preferences() {
         async function init() {
             try {
                 const [typesRes, prefsRes] = await Promise.all([
-                    axios.get('http://localhost:5001/api/contest-types', { withCredentials: true }),
-                    axios.get('http://localhost:5001/api/user/preferences', { withCredentials: true })
+                    axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/contest-types`, { withCredentials: true }),
+                    axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/user/preferences`, { withCredentials: true })
                 ]);
                 setAllTypes(typesRes.data);
                 // prefsRes.data is an array of { id, name } for subscribed types
@@ -48,7 +48,7 @@ function Preferences() {
         e.preventDefault();
         try {
             await axios.post(
-                'http://localhost:5001/api/user/preferences',
+                `http://localhost:5001/api/user/preferences`,
                 { contestTypeIds: Array.from(selectedIds) },
                 { withCredentials: true }
             );

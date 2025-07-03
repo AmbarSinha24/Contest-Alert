@@ -98,15 +98,32 @@ const ReminderPreference = sequelize.define('ReminderPreference', {
     timestamps: false
 });
 
+// const Contest = sequelize.define('Contest', {
+//     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+//     name: { type: DataTypes.STRING, allowNull: false },
+//     startTime: { type: DataTypes.INTEGER, allowNull: false },
+//     duration: { type: DataTypes.INTEGER, allowNull: false }
+// }, {
+//     tableName: 'contests',
+//     timestamps: false
+// });
 const Contest = sequelize.define('Contest', {
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
     name: { type: DataTypes.STRING, allowNull: false },
     startTime: { type: DataTypes.INTEGER, allowNull: false },
     duration: { type: DataTypes.INTEGER, allowNull: false }
+    // plus your PlatformId and ContestTypeId foreign keys…
 }, {
     tableName: 'contests',
-    timestamps: false
+    timestamps: false,
+    indexes: [
+        {
+            unique: true,
+            fields: ['PlatformId', 'name', 'startTime']
+        }
+    ]
 });
+
 
 // const CalendarEvent = sequelize.define('CalendarEvent', {
 //     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -200,53 +217,6 @@ passport.use(new GoogleStrategy({
         return done(err, null);
     }
 }));
-// passport.use(new GoogleStrategy({
-//     clientID: process.env.GOOGLE_CLIENT_ID,
-//     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-//     callbackURL: '/auth/google/callback',
-//     scope: [
-//         'openid',
-//         'profile',
-//         'email',
-//         'https://www.googleapis.com/auth/calendar.events'
-//     ],
-//     accessType: 'offline',
-//     prompt: 'consent'
-// }, async (accessToken, refreshToken, profile, done) => {
-//     try {
-//         // 1) Use the accessToken to call People API
-//         const oAuth2Client = new google.auth.OAuth2();
-//         oAuth2Client.setCredentials({ access_token: accessToken });
-//         const people = google.people({ version: 'v1', auth: oAuth2Client });
-//         const me = await people.people.get({
-//             resourceName: 'people/me',
-//             personFields: 'photos'
-//         });
-
-//         // 2) Extract the public photo URL
-//         const photoUrl = me.data.photos?.[0]?.url || null;
-
-//         // 3) Create or update your local user record
-//         const [user] = await User.findOrCreate({
-//             where: { googleId: profile.id },
-//             defaults: {
-//                 name: profile.displayName,
-//                 email: profile.emails[0].value,
-//                 photo: photoUrl
-//             }
-//         });
-
-//         // 4) Always update tokens and photo (in case it changed)
-//         user.accessToken = accessToken;
-//         if (refreshToken) user.refreshToken = refreshToken;
-//         if (photoUrl) user.photo = photoUrl;
-//         await user.save();
-
-//         return done(null, user);
-//     } catch (err) {
-//         return done(err, null);
-//     }
-// }));
 
 
 passport.serializeUser((user, done) => done(null, user.id));
@@ -280,11 +250,11 @@ app.get('/auth/google/callback',
     async (req, res) => {
         try {
             const user = req.user;
-            await axios.post('http://localhost:5001/api/updateContests'); // ⬅️ Add this
+            //await axios.post('http://localhost:5001/api/updateContests'); // ⬅️ Add this
 
             const prefs = await user.getContestTypes();
             if (!prefs.length) {
-                return res.redirect('http://localhost:3000');
+                return res.redirect(`${process.env.REACT_APP_FRONTEND_URL}`);
             }
 
             const now = Math.floor(Date.now() / 1000);
@@ -325,7 +295,7 @@ app.get('/auth/google/callback',
                 await new Promise(r => setTimeout(r, 500)); // Optional: prevent spam
             }
 
-            res.redirect('http://localhost:3000');
+            res.redirect(`${process.env.REACT_APP_FRONTEND_URL}`);
         } catch (err) {
             console.error('OAuth calendar insertion failed:', err);
             res.redirect('/login');
@@ -449,16 +419,6 @@ function getNextWeeklyContest(now) {
     return result;
 }
 
-// function getNextBiweeklyContest(now) {
-//     const ref = new Date(Date.UTC(2022, 0, 8, 14, 30, 0));
-//     const ms = 24 * 60 * 60 * 1000;
-//     const diff = Math.floor((now - ref) / ms);
-//     const periods = Math.floor(diff / 14);
-//     let cand = new Date(ref.getTime() + periods * 14 * ms);
-//     cand.setUTCHours(14, 30, 0, 0);
-//     if (cand <= now) cand = new Date(cand.getTime() + 14 * ms);
-//     return cand;
-// }
 
 function getNextBiweeklyContest(now) {
     const reference = new Date(Date.UTC(2022, 0, 8, 14, 30)); // Jan 8, 2022, 8 PM IST = 14:30 UTC
@@ -507,6 +467,13 @@ function parseCodeforcesType(name) {
 // 
 app.post('/api/updateContests', async (req, res) => {
     try {
+        const now = Math.floor(Date.now() / 1000);
+        await Contest.destroy({
+            where: {
+                startTime: { [Op.lt]: now - 3600 } // delete contests that ended >1hr ago
+            }
+        });
+
         const cfData = await fetchCodeforcesContests();
         const lcData = computeUpcomingLeetCodeContests();
         const allData = [...cfData, ...lcData];
@@ -562,49 +529,6 @@ app.get('/api/contests', async (req, res) => {
     res.json(contests);
 });
 
-
-// async function createCalendarEvent(user, contest) {
-//     const oAuth2Client = new google.auth.OAuth2(
-//         process.env.GOOGLE_CLIENT_ID,
-//         process.env.GOOGLE_CLIENT_SECRET
-//     );
-
-//     oAuth2Client.setCredentials({
-//         access_token: user.accessToken,
-//         refresh_token: user.refreshToken
-//     });
-
-//     const calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
-
-//     const event = {
-//         summary: contest.name,
-//         description: `${contest.name} - Programming Contest`,
-//         start: {
-//             dateTime: new Date(contest.startTime * 1000).toISOString(),
-//             timeZone: 'Asia/Kolkata'
-//         },
-//         end: {
-//             dateTime: new Date((contest.startTime + contest.duration) * 1000).toISOString(),
-//             timeZone: 'Asia/Kolkata'
-//         },
-//         reminders: {
-//             useDefault: false,
-//             overrides: [{ method: 'popup', minutes: 10 }]
-//         }
-//     };
-
-
-//     try {
-//         const res = await calendar.events.insert({ ... });
-//         console.log('📅 Event created:', res.data);
-//         return res.data.id;
-//     } catch (err) {
-//         console.error('❌ Calendar insert failed:', err.response?.data || err.message);
-//         throw err;
-//     }
-
-//     return res.data.id; // 👈 return Google Calendar event ID
-//}
 async function createCalendarEvent(user, contest) {
     const oAuth2Client = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,

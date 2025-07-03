@@ -7,13 +7,13 @@ const Footer = () => {
     return (
         <div className='mt-[100px]'>
             {/* Horizontal line above footer */}
-            <hr className="border-t border-gray-800 dark:border-gray-700 max-w-7xl mx-auto" />
+            <hr className="border-t border-gray-800 dark:border-gray-700 max-w-7xl mb-5 mx-auto" />
             <footer className="bg-white dark:bg-gray-900">
                 <div className="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
                     <div className="md:flex md:justify-between">
                         <div className="mb-6 md:mb-0">
                             <a onClick={() => navigate('/')} className="flex items-center cursor-pointer">
-                                <img src="https://flowbite.com/docs/images/logo.svg" class="h-8 me-3" alt="FlowBite Logo" />
+                                <img src={assets.logo} class="h-8 me-3" alt="FlowBite Logo" />
                                 <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Contest Alert</span>
                             </a>
                         </div>

@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { assets } from '../assets/assets';
 import { useNavigate, useLocation } from 'react-router-dom';
 const Navbar = () => {
     const navigate = useNavigate();
@@ -9,7 +10,7 @@ const Navbar = () => {
         <nav className="relative flex items-center py-4 mb-5 border-b border-b-[#ADADAD]">
             {/* Left: Logo and Title */}
             <div className="flex items-center gap-3">
-                <img onClick={() => navigate('/')} src="https://flowbite.com/docs/images/logo.svg" className="ml-3 h-8 cursor-pointer" alt="Logo" />
+                <img onClick={() => navigate('/')} src={assets.logo} className="ml-3 h-8 cursor-pointer" alt="Logo" />
                 <span onClick={() => navigate('/')} className="text-2xl font-semibold whitespace-nowrap dark:text-white cursor-pointer">Contest Alert</span>
             </div>
 

@@ -18,7 +18,7 @@ function App() {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get('http://localhost:5001/api/user/info', { withCredentials: true });
+                const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/user/info`, { withCredentials: true });
                 setUser(res.data);
             } catch {
                 setUser(null);

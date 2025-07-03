@@ -10,7 +10,7 @@ function Contests() {
     useEffect(() => {
         const fetchContests = async () => {
             try {
-                const response = await axios.get('http://localhost:5001/api/contests');
+                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/contests`);
                 setContests(response.data);
                 setLoading(false);
             } catch (error) {
@@ -21,7 +21,7 @@ function Contests() {
         fetchContests();
     }, []);
     const handleAddToCalendar = async (contestId) => {
-        const res = await fetch(`http://localhost:5001/api/add-to-calendar/${contestId}`, {
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/add-to-calendar/${contestId}`, {
             method: 'POST',
             credentials: 'include'
         });
@@ -31,9 +31,9 @@ function Contests() {
 
     const updateContests = async () => {
         try {
-            await axios.post('http://localhost:5001/api/updateContests');
+            await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/updateContests`);
             // Re-fetch contests after update
-            const response = await axios.get('http://localhost:5001/api/contests');
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/contests`);
             setContests(response.data);
             setUpdateMsg('Contests updated successfully!');
             console.log("📢 Updated Contest List:");
