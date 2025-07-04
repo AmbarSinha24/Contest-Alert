@@ -313,7 +313,10 @@ app.get('/auth/google/callback',
                 await new Promise(r => setTimeout(r, 500)); // Optional: prevent spam
             }
 
-            res.redirect(`${process.env.REACT_APP_FRONTEND_URL}`);
+            //res.redirect(`${process.env.REACT_APP_FRONTEND_URL}`);
+            // In callback:
+            res.redirect(`${process.env.FRONTEND_URL}/?authSuccess=true`);
+
         } catch (err) {
             console.error('OAuth calendar insertion failed:', err);
             res.redirect('/login');
