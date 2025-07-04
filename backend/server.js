@@ -191,6 +191,8 @@ sequelize.sync()
 //     resave: false,
 //     saveUninitialized: false
 // }));
+
+app.set('trust proxy', 1); // 👈 Add this line above app.use(session)
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
