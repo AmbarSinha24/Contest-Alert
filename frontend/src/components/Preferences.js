@@ -48,7 +48,7 @@ function Preferences() {
         e.preventDefault();
         try {
             await axios.post(
-                `http://localhost:5001/api/user/preferences`,
+                `${process.env.REACT_APP_BACKEND_URL}/api/user/preferences`,
                 { contestTypeIds: Array.from(selectedIds) },
                 { withCredentials: true }
             );
