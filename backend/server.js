@@ -11,7 +11,13 @@ const { Sequelize, DataTypes, Op } = require('sequelize');
 const { google } = require('googleapis');
 
 const app = express();
-app.use(cors({ origin: true, credentials: true }));
+// app.use(cors({ origin: true, credentials: true }));
+app.use(cors({
+  origin: 'https://contest-alert.vercel.app',
+  credentials: true
+}));
+
+
 app.use(express.json());
 
 // ----- 1) Initialize Sequelize (MySQL) -----
@@ -180,11 +186,23 @@ sequelize.sync()
 
 
 // ----- 5) Session & Passport Setup -----
+// app.use(session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: false
+// }));
 app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: true,        // HTTPS only
+    sameSite: 'none',    // Allow cross‑site
+    maxAge: 1000 * 60 * 60  // whatever you like
+  }
 }));
+
+
 app.use(passport.initialize());
 app.use(passport.session());
 
