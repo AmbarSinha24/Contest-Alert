@@ -10,7 +10,8 @@ function Contests() {
     useEffect(() => {
         const fetchContests = async () => {
             try {
-                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/contests`);
+                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/contests`,
+                    { withCredentials: true });
                 setContests(response.data);
                 setLoading(false);
             } catch (error) {
@@ -21,19 +22,24 @@ function Contests() {
         fetchContests();
     }, []);
     const handleAddToCalendar = async (contestId) => {
-        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/add-to-calendar/${contestId}`, {
-            method: 'POST',
-            credentials: 'include'
-        });
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/add-to-calendar/${contestId}`,
+            {
+                method: 'POST',
+                credentials: 'include'              // ← send cookies
+            });
         const data = await res.json();
         alert(data.message);
     };
 
     const updateContests = async () => {
         try {
-            await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/updateContests`);
+            await axios.post(
+                `${process.env.REACT_APP_BACKEND_URL}/api/updateContests`,
+                {},                                   // must supply a body for POST
+                { withCredentials: true });
             // Re-fetch contests after update
-            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/contests`);
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/contests`,
+                { withCredentials: true });
             setContests(response.data);
             setUpdateMsg('Contests updated successfully!');
             console.log("📢 Updated Contest List:");
