@@ -1,5 +1,6 @@
 # 🗕 Contest Alert
 
+Site is live at: https://contest-alert.vercel.app/
 A full-stack web application to help competitive programmers **never miss a contest**!
 It integrates **Google Calendar** and **email reminders** for contests from **Codeforces** and **LeetCode**, filtered by user preferences.
 
@@ -75,9 +76,20 @@ DB_PORT=3306
 # Email
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_app_password
+
+#Front end and Backend URLs
+REACT_APP_BACKEND_URL=your_backend_url
+REACT_APP_FRONTEND_URL=your_frontend_url
 ```
 
 > 🔐 Ensure your Gmail account has "App Passwords" enabled if using 2FA.
+
+Create another `.env` file in the `frontend/` folder:
+
+```env
+REACT_APP_BACKEND_URL=your_backend_url
+REACT_APP_FRONTEND_URL=your_frontend_url
+```
 
 ---
 
