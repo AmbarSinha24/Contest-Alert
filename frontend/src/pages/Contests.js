@@ -49,22 +49,22 @@ function Contests() {
     };
 
     return (
-        <div className="max-w-7xl mx-auto py-4 px-2 font-sans">
+        <div className="max-w-7xl mx-auto py-4 px-2">
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">
-                        Upcoming Contests
+                    <h1 className="font-display text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-white">
+                        Upcoming contests
                     </h1>
                     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                        Stay ahead of the competition. Update the list below and select contests to sync with your calendar.
+                        Check the ones you want, then sync them to your calendar in one go.
                     </p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                    <button 
-                        onClick={updateContests} 
+                    <button
+                        onClick={updateContests}
                         disabled={updating}
-                        className={`text-white font-bold bg-gradient-to-r from-indigo-600 to-indigo-700 dark:from-teal-500 dark:to-teal-600 hover:opacity-90 shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] transition-all duration-300 rounded-2xl text-sm px-6 py-3.5 text-center flex items-center justify-center gap-2 ${
+                        className={`text-white font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-teal-500 dark:to-teal-600 hover:opacity-90 shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] transition-all duration-300 rounded-2xl text-sm px-6 py-3.5 text-center flex items-center justify-center gap-2 ${
                             updating ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                     >
@@ -95,7 +95,7 @@ function Contests() {
                     <div className="animate-pulse">Loading upcoming contests...</div>
                 </div>
             ) : contests.length === 0 ? (
-                <div className="text-center py-16 bg-white/70 dark:bg-slate-900/50 backdrop-blur-md rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-md">
+                <div className="text-center py-16 bg-slate-50/90 dark:bg-slate-900/50 backdrop-blur-md rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-md">
                     <svg className="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
@@ -115,7 +115,7 @@ function Contests() {
                                 key={index}
                                 className="relative group p-[1.5px] rounded-3xl bg-slate-200/70 dark:bg-slate-800/60 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-cyan-400 dark:hover:from-teal-500 dark:hover:to-cyan-300 shadow-md hover:shadow-xl dark:shadow-none transition-all duration-300 flex flex-col justify-between"
                             >
-                                <div className="rounded-[22px] bg-white dark:bg-slate-900 p-6 h-full flex flex-col justify-between transition-colors duration-300">
+                                <div className="rounded-[22px] bg-slate-50/90 dark:bg-slate-900 p-6 h-full flex flex-col justify-between transition-colors duration-300">
                                     <div>
                                         {/* Card Header: Platform Badge */}
                                         <div className="flex items-center justify-between mb-4">
@@ -130,7 +130,7 @@ function Contests() {
                                         </div>
 
                                         {/* Card Title */}
-                                        <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 leading-snug mb-4 group-hover:text-indigo-600 dark:group-hover:text-teal-400 transition-colors duration-200">
+                                        <h3 className="font-display text-lg font-bold text-slate-900 dark:text-slate-100 leading-snug mb-4 group-hover:text-indigo-600 dark:group-hover:text-teal-400 transition-colors duration-200">
                                             {contest.name}
                                         </h3>
 

@@ -29,7 +29,11 @@ function App() {
 
     return (
         <Router>
-            <div className="min-h-screen flex flex-col justify-between bg-gradient-to-br from-indigo-50/80 via-slate-50 to-cyan-50/60 text-slate-800 transition-colors duration-300 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/40 dark:text-slate-100">
+            <div className="min-h-screen flex flex-col justify-between bg-white text-slate-800 transition-colors duration-300 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/40 dark:text-slate-100 relative overflow-hidden">
+                {/* Background ambient light blobs (dark mode only) */}
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] hidden dark:block bg-indigo-900/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] hidden dark:block bg-cyan-900/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+
                 <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex-grow">
                     <Navbar user={user} />
                     <div className="py-6">

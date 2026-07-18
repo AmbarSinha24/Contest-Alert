@@ -1,5 +1,52 @@
+# ───────────────────────────────────────────────────
+#  Dependencies
+# ───────────────────────────────────────────────────
+node_modules/
 backend/node_modules/
 frontend/node_modules/
+
+# ───────────────────────────────────────────────────
+#  Environment variables
+# ───────────────────────────────────────────────────
+.env
 backend/.env
-frontend/build
 frontend/.env
+
+# Always commit the example templates
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+
+# ───────────────────────────────────────────────────
+#  Build output (CRA)
+# ───────────────────────────────────────────────────
+frontend/build/
+
+# ───────────────────────────────────────────────────
+#  npm local cache (created by CRA dev server)
+# ───────────────────────────────────────────────────
+frontend/.npm-local-cache/
+
+# ───────────────────────────────────────────────────
+#  Logs
+# ───────────────────────────────────────────────────
+backend/backend.log
+frontend/frontend.log
+
+# ───────────────────────────────────────────────────
+#  OS artifacts
+# ───────────────────────────────────────────────────
+.DS_Store
+backend/.DS_Store
+frontend/.DS_Store
+
+# ───────────────────────────────────────────────────
+#  Editor / tooling
+# ───────────────────────────────────────────────────
+.claude/
+
+# ───────────────────────────────────────────────────
+#  Lock files  (keep frontend's, drop root-level one
+#  which was auto-generated and is redundant)
+# ───────────────────────────────────────────────────
+/package-lock.json

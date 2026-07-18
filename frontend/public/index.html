@@ -7,18 +7,30 @@
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="Contest Aggregator App" />
     <title>Contest Aggregator</title>
-    
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Load Tailwind CDN for immediate processing -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Configure Tailwind for class-based dark mode -->
     <script>
         tailwind.config = {
-            darkMode: 'class'
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Sora', 'system-ui', 'sans-serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
         }
     </script>
 </head>
 
-<body class="transition-colors duration-350">
+<body class="font-sans transition-colors duration-350">
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
 </body>

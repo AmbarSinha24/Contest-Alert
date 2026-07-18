@@ -3,6 +3,19 @@
 # Store script location
 WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# ----- 0) Release existing ports if in use -----
+if lsof -t -i :5001 >/dev/null 2>&1; then
+    echo "⚠️ Port 5001 is already in use. Stopping conflicting backend process..."
+    kill $(lsof -t -i :5001) 2>/dev/null
+    sleep 1
+fi
+
+if lsof -t -i :3000 >/dev/null 2>&1; then
+    echo "⚠️ Port 3000 is already in use. Stopping conflicting frontend process..."
+    kill $(lsof -t -i :3000) 2>/dev/null
+    sleep 1
+fi
+
 echo "🚀 Starting Contest Alert Application..."
 
 # Functions to clean up on exit

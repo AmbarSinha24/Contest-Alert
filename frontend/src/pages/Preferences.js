@@ -66,11 +66,14 @@ function Preferences() {
 
     if (!isLoggedIn) {
         return (
-            <div className="flex justify-center py-12 px-4 font-sans">
-                <div className="max-w-md w-full bg-white/70 dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl text-center">
-                    <h2 className="text-2xl font-bold text-red-500 mb-4">Access Denied</h2>
-                    <p className="text-slate-600 dark:text-slate-300 text-sm mb-6">{error}</p>
-                    <a href="/login" className="inline-block bg-indigo-600 dark:bg-teal-500 text-white font-bold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-all">Go to Login</a>
+            <div className="flex justify-center py-12 px-4">
+                <div className="max-w-md w-full bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800/80 shadow-2xl rounded-3xl p-10 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center mx-auto mb-5 text-2xl">
+                        🔒
+                    </div>
+                    <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white mb-2">Sign in required</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 leading-relaxed">{error}</p>
+                    <a href="/login" className="inline-block bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-teal-500 dark:to-teal-600 text-white font-bold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-all">Continue to login</a>
                 </div>
             </div>
         );
@@ -78,9 +81,9 @@ function Preferences() {
 
     if (error && allTypes.length === 0) {
         return (
-            <div className="flex justify-center py-12 px-4 font-sans">
-                <div className="max-w-md w-full bg-white/70 dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl text-center">
-                    <h2 className="text-2xl font-bold text-red-500 mb-4">Error</h2>
+            <div className="flex justify-center py-12 px-4">
+                <div className="max-w-md w-full bg-slate-50/90 dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl text-center">
+                    <h2 className="font-display text-xl font-bold text-slate-900 dark:text-white mb-4">Something went wrong</h2>
                     <p className="text-slate-600 dark:text-slate-300 text-sm">{error}</p>
                 </div>
             </div>
@@ -89,56 +92,80 @@ function Preferences() {
 
     if (allTypes.length === 0) {
         return (
-            <div className="flex items-center justify-center min-h-[400px] text-slate-500 dark:text-slate-400 text-sm font-semibold font-sans">
+            <div className="flex items-center justify-center min-h-[400px] text-slate-500 dark:text-slate-400 text-sm font-semibold">
                 <div className="animate-pulse">Loading preferences...</div>
             </div>
         );
     }
 
+    const isCadence = (name) => name === 'Weekly' || name === 'Biweekly';
+    const cadenceTypes = allTypes.filter(t => isCadence(t.name));
+    const divisionTypes = allTypes.filter(t => !isCadence(t.name));
+
+    const ToggleRow = ({ type }) => {
+        const isChecked = selectedIds.has(type.id);
+        return (
+            <div
+                className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 transition-colors duration-200"
+            >
+                <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+                    {type.name}
+                </span>
+                <button
+                    type="button"
+                    role="switch"
+                    aria-checked={isChecked}
+                    onClick={() => toggle(type.id)}
+                    className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500/25 dark:focus:ring-teal-500/25 ${
+                        isChecked ? 'bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-teal-400 dark:to-teal-500' : 'bg-slate-200 dark:bg-slate-700'
+                    }`}
+                >
+                    <span
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200 ${
+                            isChecked ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                    />
+                </button>
+            </div>
+        );
+    };
+
     return (
-        <div className="max-w-xl mx-auto my-8 font-sans">
-            <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl transition-colors duration-300">
+        <div className="max-w-xl mx-auto my-8">
+            <div className="bg-slate-50/90 dark:bg-slate-900/60 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl transition-colors duration-300">
                 <div className="mb-8">
-                    <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">
-                        Alert Preferences
+                    <h2 className="font-display text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+                        Alert preferences
                     </h2>
                     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                        Choose which types of programming contests trigger email alerts and Google Calendar events.
+                        Choose which contests trigger email alerts and Google Calendar events.
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 gap-3">
-                        {allTypes.map((type) => {
-                            const isChecked = selectedIds.has(type.id);
-                            return (
-                                <label 
-                                    key={type.id} 
-                                    className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 cursor-pointer ${
-                                        isChecked 
-                                            ? 'bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-900/50' 
-                                            : 'bg-white/30 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800/30'
-                                    }`}
-                                >
-                                    <input
-                                        className="w-5 h-5 text-indigo-600 dark:text-teal-400 bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 rounded-md focus:ring-indigo-500 dark:focus:ring-teal-400 focus:ring-2"
-                                        type="checkbox"
-                                        checked={isChecked}
-                                        onChange={() => toggle(type.id)}
-                                    />
-                                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-                                        {type.name}
-                                    </span>
-                                </label>
-                            );
-                        })}
-                    </div>
+                <form onSubmit={handleSubmit}>
+                    {cadenceTypes.length > 0 && (
+                        <div className="mb-8">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">LeetCode</h3>
+                            <div className="grid grid-cols-1 gap-2.5">
+                                {cadenceTypes.map((type) => <ToggleRow key={type.id} type={type} />)}
+                            </div>
+                        </div>
+                    )}
 
-                    <button 
-                        className="w-full text-white font-bold bg-gradient-to-r from-indigo-600 to-indigo-700 dark:from-teal-500 dark:to-teal-600 hover:opacity-90 shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] transition-all duration-300 rounded-2xl text-sm py-3.5 px-6 text-center mt-6"
-                        type="submit" 
+                    {divisionTypes.length > 0 && (
+                        <div className="mb-8">
+                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">Codeforces</h3>
+                            <div className="grid grid-cols-1 gap-2.5">
+                                {divisionTypes.map((type) => <ToggleRow key={type.id} type={type} />)}
+                            </div>
+                        </div>
+                    )}
+
+                    <button
+                        className="w-full text-white font-bold bg-gradient-to-r from-indigo-600 to-cyan-500 dark:from-teal-500 dark:to-teal-600 hover:opacity-90 shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] transition-all duration-300 rounded-2xl text-sm py-3.5 px-6 text-center"
+                        type="submit"
                     >
-                        Save Preferences
+                        Save preferences
                     </button>
                 </form>
 
