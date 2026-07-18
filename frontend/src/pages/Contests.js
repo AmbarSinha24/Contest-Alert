@@ -13,13 +13,21 @@ function Contests() {
         return () => { isMounted.current = false; };
     }, []);
 
-    // Fetch contests on component mount
+    // Fetch contests on component mount (uses sessionStorage cache)
     useEffect(() => {
+        const cachedData = sessionStorage.getItem('contests');
+        if (cachedData) {
+            setContests(JSON.parse(cachedData));
+            setLoading(false);
+            return;
+        }
+
         const fetchContests = async () => {
             try {
                 const response = await api.get('/api/contests');
                 if (!isMounted.current) return;
                 setContests(response.data);
+                sessionStorage.setItem('contests', JSON.stringify(response.data));
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching contests:", error);
@@ -54,6 +62,7 @@ function Contests() {
             const response = await api.get('/api/contests');
             if (!isMounted.current) return;
             setContests(response.data);
+            sessionStorage.setItem('contests', JSON.stringify(response.data)); // Update cache
             setUpdateMsg('Contests updated successfully!');
         } catch (error) {
             console.error("Error updating contests:", error);

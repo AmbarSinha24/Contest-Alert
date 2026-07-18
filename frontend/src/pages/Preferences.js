@@ -13,6 +13,15 @@ function Preferences() {
     // Fetch contest types and user’s current preferences
     useEffect(() => {
         let ignore = false;
+        
+        const cachedTypes = sessionStorage.getItem('contest_types');
+        const cachedPrefs = sessionStorage.getItem('user_preferences');
+        
+        if (cachedTypes && cachedPrefs) {
+            setAllTypes(JSON.parse(cachedTypes));
+            setSelectedIds(new Set(JSON.parse(cachedPrefs)));
+        }
+
         async function init() {
             try {
                 const [typesRes, prefsRes] = await Promise.all([
@@ -20,8 +29,13 @@ function Preferences() {
                     api.get('/api/user/preferences')
                 ]);
                 if (ignore) return;
+                
                 setAllTypes(typesRes.data);
-                setSelectedIds(new Set(prefsRes.data.map(t => t.id)));
+                const prefsIds = prefsRes.data.map(t => t.id);
+                setSelectedIds(new Set(prefsIds));
+                
+                sessionStorage.setItem('contest_types', JSON.stringify(typesRes.data));
+                sessionStorage.setItem('user_preferences', JSON.stringify(prefsIds));
             } catch (err) {
                 console.error('Error initializing preferences:', err);
                 if (ignore) return;
@@ -50,10 +64,13 @@ function Preferences() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
+            const prefsIds = Array.from(selectedIds);
             await api.post(
                 '/api/user/preferences',
-                { contestTypeIds: Array.from(selectedIds) }
+                { contestTypeIds: prefsIds }
             );
+            sessionStorage.setItem('user_preferences', JSON.stringify(prefsIds));
+            sessionStorage.removeItem('user_info'); // Force Account page to fetch updated user preferences
             setMessage('Preferences updated successfully.');
             setError('');
         } catch (err) {

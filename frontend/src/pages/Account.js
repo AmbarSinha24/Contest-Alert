@@ -11,10 +11,18 @@ function Account() {
 
     useEffect(() => {
         let ignore = false;
+        
+        const cachedUser = sessionStorage.getItem('user_info');
+        if (cachedUser) {
+            setUserInfo(JSON.parse(cachedUser));
+        }
+
         async function fetchUserInfo() {
             try {
                 const res = await api.get('/api/user/info');
-                if (!ignore) setUserInfo(res.data);
+                if (ignore) return;
+                setUserInfo(res.data);
+                sessionStorage.setItem('user_info', JSON.stringify(res.data));
             } catch (err) {
                 console.error('Error fetching user info:', err);
                 if (ignore) return;
@@ -36,6 +44,7 @@ function Account() {
         } catch (err) {
             console.error('Logout failed:', err);
         } finally {
+            sessionStorage.clear(); // Clear all caches on logout
             navigate('/login');
         }
     };
