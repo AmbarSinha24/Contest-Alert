@@ -12,16 +12,19 @@ function Preferences() {
 
     // Fetch contest types and user’s current preferences
     useEffect(() => {
+        let ignore = false;
         async function init() {
             try {
                 const [typesRes, prefsRes] = await Promise.all([
                     api.get('/api/contest-types'),
                     api.get('/api/user/preferences')
                 ]);
+                if (ignore) return;
                 setAllTypes(typesRes.data);
                 setSelectedIds(new Set(prefsRes.data.map(t => t.id)));
             } catch (err) {
                 console.error('Error initializing preferences:', err);
+                if (ignore) return;
                 if (err.response?.status === 401) {
                     setIsLoggedIn(false);
                     setError('Please log in first.');
@@ -31,6 +34,7 @@ function Preferences() {
             }
         }
         init();
+        return () => { ignore = true; };
     }, []);
 
     // Toggle a contest-type ID in the Set

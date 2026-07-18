@@ -16,15 +16,17 @@ function App() {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
+        let ignore = false;
         const fetchUser = async () => {
             try {
                 const res = await api.get('/api/user/info');
-                setUser(res.data);
+                if (!ignore) setUser(res.data);
             } catch {
-                setUser(null);
+                if (!ignore) setUser(null);
             }
         };
         fetchUser();
+        return () => { ignore = true; };
     }, []);
 
     return (

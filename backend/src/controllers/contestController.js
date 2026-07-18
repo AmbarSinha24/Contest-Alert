@@ -6,8 +6,14 @@ const { sendEmail } = require('../services/emailService');
 const updateContests = async (req, res) => {
     try {
         const now = Math.floor(Date.now() / 1000);
-        // Clear past contests (more than 1 hour old)
-        await Contest.deleteMany({ startTime: { $lt: now - 3600 } });
+        // Clear past contests (more than 1 hour old), along with any calendar
+        // event records that reference them, so they don't orphan in the DB.
+        const elapsed = await Contest.find({ startTime: { $lt: now - 3600 } }, '_id');
+        if (elapsed.length) {
+            const elapsedIds = elapsed.map(c => c._id);
+            await CalendarEvent.deleteMany({ ContestId: { $in: elapsedIds } });
+            await Contest.deleteMany({ _id: { $in: elapsedIds } });
+        }
 
         const allData = await fetchAllContests();
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 
 function Contests() {
@@ -6,21 +6,35 @@ function Contests() {
     const [loading, setLoading] = useState(true);
     const [updateMsg, setUpdateMsg] = useState('');
     const [updating, setUpdating] = useState(false);
+    const isMounted = useRef(true);
+
+    useEffect(() => {
+        isMounted.current = true;
+        return () => { isMounted.current = false; };
+    }, []);
 
     // Fetch contests on component mount
     useEffect(() => {
         const fetchContests = async () => {
             try {
                 const response = await api.get('/api/contests');
+                if (!isMounted.current) return;
                 setContests(response.data);
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching contests:", error);
-                setLoading(false);
+                if (isMounted.current) setLoading(false);
             }
         };
         fetchContests();
     }, []);
+
+    // Auto-dismiss the sync status banner
+    useEffect(() => {
+        if (!updateMsg) return;
+        const timer = setTimeout(() => setUpdateMsg(''), 12000);
+        return () => clearTimeout(timer);
+    }, [updateMsg]);
 
     const handleAddToCalendar = async (contestId) => {
         try {
@@ -38,13 +52,14 @@ function Contests() {
         try {
             await api.post('/api/updateContests');
             const response = await api.get('/api/contests');
+            if (!isMounted.current) return;
             setContests(response.data);
             setUpdateMsg('Contests updated successfully!');
         } catch (error) {
             console.error("Error updating contests:", error);
-            setUpdateMsg('Error updating contests.');
+            if (isMounted.current) setUpdateMsg('Error updating contests.');
         } finally {
-            setUpdating(false);
+            if (isMounted.current) setUpdating(false);
         }
     };
 
@@ -75,7 +90,7 @@ function Contests() {
                             </svg>
                         ) : (
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.253 8H18" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
                         )}
                         Sync Platforms
@@ -123,7 +138,7 @@ function Contests() {
                                                 {platform}
                                             </span>
                                             {contest.ContestType?.name && (
-                                                <span className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase">
+                                                <span className="text-xs font-medium text-slate-400 dark:text-white uppercase">
                                                     {contest.ContestType.name}
                                                 </span>
                                             )}
@@ -136,9 +151,9 @@ function Contests() {
 
                                         {/* Card Details */}
                                         <div className="space-y-2 mb-6">
-                                            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-350 text-sm">
+                                            <div className="flex items-center gap-3 text-slate-600 dark:text-white text-sm">
                                                 {/* Calendar Icon */}
-                                                <svg className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                <svg className="w-4 h-4 text-slate-400 dark:text-teal-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                 </svg>
                                                 <span>
@@ -147,9 +162,9 @@ function Contests() {
                                                     })}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-350 text-sm">
+                                            <div className="flex items-center gap-3 text-slate-600 dark:text-white text-sm">
                                                 {/* Clock Icon */}
-                                                <svg className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                <svg className="w-4 h-4 text-slate-400 dark:text-teal-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                                 <span>
@@ -158,9 +173,9 @@ function Contests() {
                                                     })}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-3 text-slate-600 dark:text-slate-350 text-sm">
+                                            <div className="flex items-center gap-3 text-slate-600 dark:text-white text-sm">
                                                 {/* Hourglass Icon */}
-                                                <svg className="w-4 h-4 text-slate-400 dark:text-slate-500 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                <svg className="w-4 h-4 text-slate-400 dark:text-teal-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                                                 </svg>
                                                 <span>

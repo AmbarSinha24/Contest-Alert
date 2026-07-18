@@ -6,15 +6,17 @@ function Login() {
     const [message, setMessage] = useState('');
 
     useEffect(() => {
+        let ignore = false;
         async function fetchUser() {
             try {
                 const res = await api.get('/api/user/info');
-                setUser(res.data);
+                if (!ignore) setUser(res.data);
             } catch (error) {
-                setUser(null);
+                if (!ignore) setUser(null);
             }
         }
         fetchUser();
+        return () => { ignore = true; };
     }, []);
 
     const handleLogout = async () => {

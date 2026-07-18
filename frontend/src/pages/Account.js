@@ -10,12 +10,14 @@ function Account() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        let ignore = false;
         async function fetchUserInfo() {
             try {
                 const res = await api.get('/api/user/info');
-                setUserInfo(res.data);
+                if (!ignore) setUserInfo(res.data);
             } catch (err) {
                 console.error('Error fetching user info:', err);
+                if (ignore) return;
                 if (err.response?.status === 401) {
                     setIsLoggedIn(false);
                     setError('Please login first.');
@@ -25,6 +27,7 @@ function Account() {
             }
         }
         fetchUserInfo();
+        return () => { ignore = true; };
     }, []);
 
     const handleLogout = async () => {
