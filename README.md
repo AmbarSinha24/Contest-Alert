@@ -1,143 +1,171 @@
-# 🗕 Contest Alert
+# Contest Alert
 
-A full-stack web application to help competitive programmers **never miss a contest**!
-It integrates **Google Calendar** and **email reminders** for contests from **Codeforces** and **LeetCode**, filtered by user preferences.
+A full-stack aggregator that helps competitive programmers **never miss a contest**. It pulls upcoming rounds from **Codeforces** and **LeetCode**, lets you filter by the types you actually care about, and keeps you notified two ways: an email reminder 20 minutes before start, and a one-click (or automatic) push to your **Google Calendar**.
 
----
-
-## 🚀 Features
-
-* 🔐 Google OAuth 2.0 login
-* 📋 Choose contest types to follow (Div1, Div2, Weekly, Biweekly, etc.)
-* 📬 Email reminders 20 minutes before the contest
-* 🗓 Add upcoming contests to Google Calendar with one click
-* 🌓 Sleek Glassmorphic interface featuring a **Dark/Light Mode toggle**
-* ⚡ Glowing gradient outlines on card hovers
-* 🌐 Platforms supported: **Codeforces**, **LeetCode**
+![Node](https://img.shields.io/badge/Node.js-18%2B-339933?logo=node.js&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![Express](https://img.shields.io/badge/Express-4-000000?logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
 ---
 
-## 🧰 Tech Stack
+## Features
 
-* **Frontend:** React, Axios (Encapsulated client services), Tailwind CSS
-* **Backend:** Node.js, Express, Passport.js, MongoDB (Mongoose ODM)
-* **Email:** Nodemailer + Gmail SMTP
-* **Calendar Integration:** Google Calendar API (OAuth 2.0)
-
----
-
-## 📂 Project Architecture (SOLID Principles)
-
-### Backend:
-* `backend/src/config/`: App configurations (database setup, Passport strategy).
-* `backend/src/schemas/`: Mongoose schemas.
-* `backend/src/services/`: Scraper strategies, Google Calendar helper, and Nodemailer dispatchers.
-* `backend/src/controllers/`: Route handlers.
-* `backend/src/routes/`: Express endpoint routing.
-* `backend/src/cron/`: Scheduler cron tasks.
-
-### Frontend:
-* `frontend/src/services/`: API instance definitions (configured Axios client).
-* `frontend/src/components/common/`: Global shell blocks (`Navbar`, `Footer`).
-* `frontend/src/components/features/`: UI dashboard sections (`Header`, `Platforms`).
-* `frontend/src/pages/`: Route views (`Home`, `Login`, `Preferences`, `Contests`, `Account`).
+- **Google OAuth 2.0 login** — sign in with Google, nothing else to set up
+- **Per-type preferences** — follow only what you care about (LeetCode Weekly/Biweekly, Codeforces Div 1–4, etc.), grouped by cadence and division
+- **Email reminders** — sent 20 minutes before a contest you've opted into starts
+- **Google Calendar sync** — preferred contests are added automatically right after login; anything else can be added manually with one click from the Contests page
+- **Manual sync** — pull the latest contest list from every platform on demand, which also clears out contests that have already elapsed
+- **Dark/light mode** with a persisted preference
+- **Codeforces + LeetCode** supported today
 
 ---
 
-## 🧑‍💻 Setup Instructions
+## Tech Stack
 
-### 1. Clone the repository
+| Layer | Stack |
+|---|---|
+| Frontend | React 18, React Router, Axios, Tailwind CSS |
+| Backend | Node.js, Express, Passport.js (Google OAuth 2.0) |
+| Database | MongoDB Atlas (Mongoose ODM), session store backed by `connect-mongo` |
+| Email | Nodemailer over Gmail SMTP |
+| Calendar | Google Calendar API |
+| Scheduling | `node-cron` (reminder dispatch) |
+
+---
+
+## Project Architecture
+
+```
+backend/
+├── server.js                    # App entry point: middleware, session, routing, cron bootstrap
+├── src/
+│   ├── config/                  # DB connection, Passport strategy
+│   ├── schemas/                 # Mongoose models (User, Contest, Platform, ContestType, CalendarEvent)
+│   ├── services/
+│   │   ├── scrapers/            # Codeforces + LeetCode contest fetchers
+│   │   ├── calendarService.js   # Google Calendar event creation
+│   │   └── emailService.js      # Nodemailer dispatch
+│   ├── controllers/             # Route handlers (auth, contests, user)
+│   ├── routes/                  # Express routers
+│   └── cron/                    # Reminder cron job
+└── migrate-to-mongo.js          # One-off migration script (legacy Sequelize -> Mongo)
+
+frontend/
+└── src/
+    ├── services/api.js          # Configured Axios client
+    ├── components/
+    │   ├── common/               # Navbar, Footer
+    │   └── features/             # Header, Platforms (home page sections)
+    ├── pages/                    # Home, Login, Preferences, Contests, Account
+    └── assets/                   # Platform icons, logos
+```
+
+---
+
+## Setup
+
+### 1. Clone
 
 ```bash
 git clone https://github.com/AmbarSinha24/Contest-Alert.git
 cd Contest-Alert
 ```
 
-### 2. Environment Variables
+### 2. Configure environment variables
 
-Create a `.env` file in the `backend/` folder:
-
-```env
-PORT=5001
-SESSION_SECRET=your_random_secret
-REACT_APP_BACKEND_URL=http://localhost:5001
-REACT_APP_FRONTEND_URL=http://localhost:3000
-
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-
-# MongoDB Database (Atlas or Local)
-MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-url>/contest_alert?retryWrites=true&w=majority
-
-# Email
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_app_password
-```
-
-> 🔐 Ensure your Gmail account has "App Passwords" enabled if using 2FA.
-
----
-
-### 3. Database Setup
-
-On starting the server, schemas are verified and default contest types (`Weekly`, `Biweekly`, `Div1`, etc.) are automatically seeded into your MongoDB Atlas database.
-
----
-
-### 4. Start the Application
-
-We have created a single command script to boot both frontend and backend servers together, manage logging, and handle graceful process terminations:
+Both `backend/` and `frontend/` ship a `.env.example` — copy each and fill in the values:
 
 ```bash
-# Set executable permissions (first time only)
-chmod +x ./open
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
 
-# Start both servers
+**`backend/.env`**
+
+| Variable | Description |
+|---|---|
+| `PORT` | Backend port (defaults to `5001`) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | From a [Google Cloud OAuth client](https://console.cloud.google.com/apis/credentials) |
+| `SESSION_SECRET` | Random string, e.g. `openssl rand -hex 32` |
+| `EMAIL_USER` / `EMAIL_PASS` | Gmail address + [App Password](https://myaccount.google.com/apppasswords) (requires 2FA enabled) |
+| `MONGODB_URI` | Connection string for a [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) cluster (or local instance) |
+| `REACT_APP_BACKEND_URL` / `REACT_APP_FRONTEND_URL` | Local dev defaults: `http://localhost:5001` / `http://localhost:3000` |
+| `NODE_ENV` | Leave unset for local dev. Set to `production` when deploying — this disables the dev-only utility routes below |
+
+**`frontend/.env`** just needs `REACT_APP_BACKEND_URL` and `REACT_APP_FRONTEND_URL`.
+
+### 3. Install dependencies
+
+```bash
+cd backend && npm install
+cd ../frontend && npm install
+```
+
+### 4. Database
+
+Nothing to run manually — on boot, the backend connects to MongoDB and seeds the fixed set of contest types (`Weekly`, `Biweekly`, `Div1`–`Div4`, `Other`) if they don't already exist.
+
+### 5. Run it
+
+A single script boots both servers, logs them separately, and shuts both down cleanly on `Ctrl+C`:
+
+```bash
+chmod +x ./open   # first time only
 ./open
 ```
 
-You can view logs at `backend/backend.log` and `frontend/frontend.log`. Press `Ctrl+C` to cleanly shut down both servers.
+- Backend: `http://localhost:5001` (logs at `backend/backend.log`)
+- Frontend: `http://localhost:3000` (logs at `frontend/frontend.log`)
+
+Or run them individually with `npm start` in each of `backend/` and `frontend/`.
 
 ---
 
-## 🌟 Usage Flow
+## Usage Flow
 
-1. Visit the app and log in using Google.
-2. Choose your preferred contest types (e.g., Weekly, Div2, etc.).
-3. The app:
-   * Automatically updates contest info.
-   * Adds upcoming contests to your Google Calendar.
-   * Sends reminder emails 20 minutes before contests.
-4. You can also:
-   * Click the "Add to Calendar" button on any upcoming contest (even outside your preferences).
-   * See if it's already added.
-
----
-
-## 🔄 Cron Jobs
-
-The backend runs a cron job every minute to:
-* Check for contests starting in ~20 minutes.
-* Send reminder emails to users who opted in.
+1. Open the app and sign in with Google.
+2. Pick the contest types you want to follow under **Preferences**.
+3. From there the app runs itself:
+   - Contests matching your preferences are pushed to your Google Calendar right after you log in.
+   - You get an email 20 minutes before each one starts.
+4. From the **Contests** page you can also:
+   - Hit **Sync Platforms** to pull the latest contests from Codeforces/LeetCode and prune ones that have already elapsed.
+   - Add any individual contest to your calendar, even ones outside your saved preferences.
 
 ---
 
-## 📌 To Do
+## API Reference
 
-* Add contest ratings filters
-* Support more platforms (AtCoder, HackerRank)
-* Calendar UI in frontend
+| Method | Route | Purpose |
+|---|---|---|
+| `GET` | `/auth/google` | Start Google OAuth flow |
+| `GET` | `/auth/google/callback` | OAuth callback; syncs preferred contests to Calendar on first login |
+| `GET` | `/auth/logout` | Sign out and destroy the session |
+| `GET` | `/api/user/info` | Current user's profile + resolved preferences |
+| `GET` | `/api/contest-types` | List all contest types |
+| `GET` / `POST` | `/api/user/preferences` | Read/update the signed-in user's followed contest types |
+| `GET` | `/api/contests` | List all known upcoming contests |
+| `POST` | `/api/updateContests` | Re-scrape Codeforces/LeetCode and prune elapsed contests |
+| `POST` | `/api/add-to-calendar/:contestId` | Add a single contest to the signed-in user's calendar |
+
+`/dev/clear-calendar-events`, `/test-send-emails`, and `/manual-send-emails` are dev-only utility routes, gated to 404 whenever `NODE_ENV=production`.
 
 ---
 
-## 🧑‍🎓 Author
+## To Do
 
-**Ambar Sinha**
-Feel free to ⭐ the repo or [connect on GitHub](https://github.com/AmbarSinha24)!
+- Contest rating/difficulty filters
+- Support more platforms (AtCoder, HackerRank)
+- In-app calendar view
 
 ---
 
-## 📄 License
+## Author
 
-MIT License
+**Ambar Sinha** — feel free to ⭐ the repo or [connect on GitHub](https://github.com/AmbarSinha24).
+
+## License
+
+MIT
