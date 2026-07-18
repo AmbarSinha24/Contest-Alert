@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+
+# Store script location
+WORKSPACE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+echo "🚀 Starting Contest Alert Application..."
+
+# Functions to clean up on exit
+cleanup() {
+    echo ""
+    echo "🛑 Shutting down backend and frontend servers..."
+    if [ -n "$BACKEND_PID" ]; then
+        kill "$BACKEND_PID" 2>/dev/null
+    fi
+    if [ -n "$FRONTEND_PID" ]; then
+        kill "$FRONTEND_PID" 2>/dev/null
+    fi
+    echo "👋 Shutdown complete."
+    exit 0
+}
+
+# Trap Ctrl+C (SIGINT) and termination (SIGTERM)
+trap cleanup SIGINT SIGTERM
+
+# ----- 1) Start Backend Server -----
+echo "📦 Starting Backend Server..."
+if [ ! -d "$WORKSPACE_DIR/backend" ]; then
+    echo "❌ Error: backend directory not found at $WORKSPACE_DIR/backend"
+    exit 1
+fi
+
+cd "$WORKSPACE_DIR/backend" || exit 1
+
+# Check for .env file
+if [ ! -f ".env" ]; then
+    echo "❌ Error: backend/.env file not found. Please create it first."
+    exit 1
+fi
+
+# Run npm start in background
+npm start > backend.log 2>&1 &
+BACKEND_PID=$!
+
+# Quick check if it crashed instantly
+sleep 2
+if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+    echo "❌ Error: Backend failed to start. Logs:"
+    cat backend.log
+    exit 1
+fi
+echo "✅ Backend started successfully (PID: $BACKEND_PID). Logs saved to backend/backend.log"
+
+# ----- 2) Start Frontend Server -----
+echo "💻 Starting Frontend Server..."
+if [ ! -d "$WORKSPACE_DIR/frontend" ]; then
+    echo "❌ Error: frontend directory not found at $WORKSPACE_DIR/frontend"
+    kill "$BACKEND_PID" 2>/dev/null
+    exit 1
+fi
+
+cd "$WORKSPACE_DIR/frontend" || exit 1
+
+# Run npm start in background
+npm start > frontend.log 2>&1 &
+FRONTEND_PID=$!
+
+# Quick check if it crashed instantly
+sleep 2
+if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
+    echo "❌ Error: Frontend failed to start. Logs:"
+    cat frontend.log
+    kill "$BACKEND_PID" 2>/dev/null
+    exit 1
+fi
+echo "✅ Frontend started successfully (PID: $FRONTEND_PID). Logs saved to frontend/frontend.log"
+
+echo "--------------------------------------------------------"
+echo "🎉 Both servers are running!"
+echo "   - Backend: http://localhost:5001"
+echo "   - Frontend: http://localhost:3000"
+echo "Press Ctrl+C to terminate both servers."
+echo "--------------------------------------------------------"
+
+# Keep the script running to monitor background processes
+while true; do
+    if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+        echo "⚠️ Backend server stopped unexpectedly."
+        cleanup
+    fi
+    if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
+        echo "⚠️ Frontend server stopped unexpectedly."
+        cleanup
+    fi
+    sleep 3
+done

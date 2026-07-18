@@ -1,16 +1,16 @@
 
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import axios from 'axios';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import api from './services/api';
 
-import Login from './components/Login';
-import Preferences from './components/Preferences';
-import Contests from './components/Contests';
-import Account from './components/Account';
-import Navbar from './components/Navbar';
-import Home from './components/Home';
-import Footer from './components/Footer';
+import Login from './pages/Login';
+import Preferences from './pages/Preferences';
+import Contests from './pages/Contests';
+import Account from './pages/Account';
+import Navbar from './components/common/Navbar';
+import Home from './pages/Home';
+import Footer from './components/common/Footer';
 
 function App() {
     const [user, setUser] = useState(null);
@@ -18,7 +18,7 @@ function App() {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/user/info`, { withCredentials: true });
+                const res = await api.get('/api/user/info');
                 setUser(res.data);
             } catch {
                 setUser(null);
@@ -29,25 +29,30 @@ function App() {
 
     return (
         <Router>
-            <Navbar user={user} />
+            <div className="min-h-screen flex flex-col justify-between bg-gradient-to-br from-indigo-50/80 via-slate-50 to-cyan-50/60 text-slate-800 transition-colors duration-300 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/40 dark:text-slate-100">
+                <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex-grow">
+                    <Navbar user={user} />
+                    <div className="py-6">
+                        <Routes>
+                            {/* The main login page */}
+                            <Route path="/" element={<Home />} />
 
-            <Routes>
-                {/* The main login page */}
-                <Route path="/" element={<Home />} />
+                            {/* Login Page*/}
+                            <Route path="/login" element={<Login />} />
 
-                {/* Login Page*/}
-                <Route path="/login" element={<Login />} />
+                            {/* Preferences page */}
+                            <Route path="/preferences" element={<Preferences />} />
 
-                {/* Preferences page */}
-                <Route path="/preferences" element={<Preferences />} />
+                            {/* Contests page */}
+                            <Route path="/contests" element={<Contests />} />
 
-                {/* Contests page */}
-                <Route path="/contests" element={<Contests />} />
-
-                {/* Account info page */}
-                <Route path="/account" element={<Account />} />
-            </Routes>
-            <Footer />
+                            {/* Account info page */}
+                            <Route path="/account" element={<Account />} />
+                        </Routes>
+                    </div>
+                </div>
+                <Footer />
+            </div>
         </Router>
     );
 }

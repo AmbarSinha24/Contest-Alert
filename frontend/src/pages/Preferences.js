@@ -1,0 +1,160 @@
+
+
+import React, { useState, useEffect } from 'react';
+import api from '../services/api';
+
+function Preferences() {
+    const [allTypes, setAllTypes] = useState([]);       // All possible contest types
+    const [selectedIds, setSelectedIds] = useState(new Set()); // User’s selected type IDs
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+    const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+    // Fetch contest types and user’s current preferences
+    useEffect(() => {
+        async function init() {
+            try {
+                const [typesRes, prefsRes] = await Promise.all([
+                    api.get('/api/contest-types'),
+                    api.get('/api/user/preferences')
+                ]);
+                setAllTypes(typesRes.data);
+                setSelectedIds(new Set(prefsRes.data.map(t => t.id)));
+            } catch (err) {
+                console.error('Error initializing preferences:', err);
+                if (err.response?.status === 401) {
+                    setIsLoggedIn(false);
+                    setError('Please log in first.');
+                } else {
+                    setError('Failed to load preferences.');
+                }
+            }
+        }
+        init();
+    }, []);
+
+    // Toggle a contest-type ID in the Set
+    const toggle = (id) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+        });
+    };
+
+    // Submit updated list of IDs
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await api.post(
+                '/api/user/preferences',
+                { contestTypeIds: Array.from(selectedIds) }
+            );
+            setMessage('Preferences updated successfully.');
+            setError('');
+        } catch (err) {
+            console.error('Error updating preferences:', err);
+            if (err.response?.status === 401) {
+                setIsLoggedIn(false);
+                setError('Please log in first.');
+            } else {
+                setError('Error updating preferences.');
+            }
+            setMessage('');
+        }
+    };
+
+    if (!isLoggedIn) {
+        return (
+            <div className="flex justify-center py-12 px-4 font-sans">
+                <div className="max-w-md w-full bg-white/70 dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl text-center">
+                    <h2 className="text-2xl font-bold text-red-500 mb-4">Access Denied</h2>
+                    <p className="text-slate-600 dark:text-slate-300 text-sm mb-6">{error}</p>
+                    <a href="/login" className="inline-block bg-indigo-600 dark:bg-teal-500 text-white font-bold px-6 py-3 rounded-xl text-sm hover:opacity-90 transition-all">Go to Login</a>
+                </div>
+            </div>
+        );
+    }
+
+    if (error && allTypes.length === 0) {
+        return (
+            <div className="flex justify-center py-12 px-4 font-sans">
+                <div className="max-w-md w-full bg-white/70 dark:bg-slate-900/60 backdrop-blur-md p-8 rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl text-center">
+                    <h2 className="text-2xl font-bold text-red-500 mb-4">Error</h2>
+                    <p className="text-slate-600 dark:text-slate-300 text-sm">{error}</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (allTypes.length === 0) {
+        return (
+            <div className="flex items-center justify-center min-h-[400px] text-slate-500 dark:text-slate-400 text-sm font-semibold font-sans">
+                <div className="animate-pulse">Loading preferences...</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-xl mx-auto my-8 font-sans">
+            <div className="bg-white/70 dark:bg-slate-900/60 backdrop-blur-md p-8 sm:p-10 rounded-3xl border border-slate-200/50 dark:border-slate-800/80 shadow-2xl transition-colors duration-300">
+                <div className="mb-8">
+                    <h2 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-cyan-600 dark:from-teal-400 dark:to-cyan-400 bg-clip-text text-transparent">
+                        Alert Preferences
+                    </h2>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                        Choose which types of programming contests trigger email alerts and Google Calendar events.
+                    </p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-1 gap-3">
+                        {allTypes.map((type) => {
+                            const isChecked = selectedIds.has(type.id);
+                            return (
+                                <label 
+                                    key={type.id} 
+                                    className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-200 cursor-pointer ${
+                                        isChecked 
+                                            ? 'bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200 dark:border-indigo-900/50' 
+                                            : 'bg-white/30 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-800/30'
+                                    }`}
+                                >
+                                    <input
+                                        className="w-5 h-5 text-indigo-600 dark:text-teal-400 bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-700 rounded-md focus:ring-indigo-500 dark:focus:ring-teal-400 focus:ring-2"
+                                        type="checkbox"
+                                        checked={isChecked}
+                                        onChange={() => toggle(type.id)}
+                                    />
+                                    <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+                                        {type.name}
+                                    </span>
+                                </label>
+                            );
+                        })}
+                    </div>
+
+                    <button 
+                        className="w-full text-white font-bold bg-gradient-to-r from-indigo-600 to-indigo-700 dark:from-teal-500 dark:to-teal-600 hover:opacity-90 shadow-lg hover:shadow-indigo-500/25 active:scale-[0.98] transition-all duration-300 rounded-2xl text-sm py-3.5 px-6 text-center mt-6"
+                        type="submit" 
+                    >
+                        Save Preferences
+                    </button>
+                </form>
+
+                {message && (
+                    <div className="mt-6 text-center py-2.5 px-4 rounded-xl text-sm bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-900/30">
+                        {message}
+                    </div>
+                )}
+                {error && (
+                    <div className="mt-6 text-center py-2.5 px-4 rounded-xl text-sm bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 border border-red-100/50 dark:border-red-900/30">
+                        {error}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default Preferences;
