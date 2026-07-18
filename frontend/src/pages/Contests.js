@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
 function Contests() {
+    const navigate = useNavigate();
     const [contests, setContests] = useState([]);
     const [loading, setLoading] = useState(true);
     const [updateMsg, setUpdateMsg] = useState('');
@@ -37,6 +39,8 @@ function Contests() {
         fetchContests();
     }, []);
 
+    const [notification, setNotification] = useState(null); // { type: 'success' | 'error' | 'warning', text: '', isAuthError: false }
+
     // Auto-dismiss the sync status banner
     useEffect(() => {
         if (!updateMsg) return;
@@ -44,13 +48,34 @@ function Contests() {
         return () => clearTimeout(timer);
     }, [updateMsg]);
 
+    // Auto-dismiss the floating notification
+    useEffect(() => {
+        if (!notification) return;
+        const timer = setTimeout(() => setNotification(null), 7000);
+        return () => clearTimeout(timer);
+    }, [notification]);
+
     const handleAddToCalendar = async (contestId) => {
         try {
             const res = await api.post(`/api/add-to-calendar/${contestId}`);
-            alert(res.data.message);
+            setNotification({
+                type: 'success',
+                text: res.data.message || 'Contest successfully added to your calendar!'
+            });
         } catch (err) {
             console.error(err);
-            alert('Failed to add to calendar');
+            if (err.response?.status === 401) {
+                setNotification({
+                    type: 'warning',
+                    text: 'Please sign in with Google to add contests to your calendar.',
+                    isAuthError: true
+                });
+            } else {
+                setNotification({
+                    type: 'error',
+                    text: 'Failed to add contest. Please try again.'
+                });
+            }
         }
     };
 
@@ -73,7 +98,67 @@ function Contests() {
     };
 
     return (
-        <div className="max-w-7xl mx-auto py-4 px-2">
+        <div className="max-w-7xl mx-auto py-4 px-2 relative">
+            {/* Custom Notification Toast */}
+            {notification && (
+                <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-md animate-in fade-in slide-in-from-top duration-300">
+                    <div className={`p-4 rounded-2xl border shadow-xl flex items-start gap-3 backdrop-blur-md ${
+                        notification.type === 'success'
+                            ? 'bg-emerald-50/95 dark:bg-emerald-950/90 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/80'
+                            : notification.type === 'warning'
+                            ? 'bg-amber-50/95 dark:bg-amber-950/90 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/80'
+                            : 'bg-rose-50/95 dark:bg-rose-950/90 text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-800/80'
+                    }`}>
+                        {/* Status Icon */}
+                        <div className="flex-shrink-0 mt-0.5">
+                            {notification.type === 'success' && (
+                                <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            )}
+                            {notification.type === 'warning' && (
+                                <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0-10.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.249-8.25-3.286Zm0 13.036h.008v.008H12v-.008Z" />
+                                </svg>
+                            )}
+                            {notification.type === 'error' && (
+                                <svg className="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                            )}
+                        </div>
+
+                        {/* Content text */}
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold leading-relaxed">
+                                {notification.text}
+                            </p>
+                            {notification.isAuthError && (
+                                <button
+                                    onClick={() => {
+                                        setNotification(null);
+                                        navigate('/login');
+                                    }}
+                                    className="mt-3 inline-flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                                >
+                                    Sign In with Google
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Dismiss button */}
+                        <button
+                            onClick={() => setNotification(null)}
+                            className="flex-shrink-0 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-0.5 rounded-lg"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Page Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
                 <div>
